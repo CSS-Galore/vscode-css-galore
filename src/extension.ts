@@ -16,6 +16,7 @@ export async function activate(context: vscode.ExtensionContext) {
     for (const mod of pack.modules) {
       const snippet = new vscode.CompletionItem(
         `_css:${pack.name}/${mod.name}`,
+        vscode.CompletionItemKind.Snippet,
       );
       const text = mod.css.replaceAll(
         ".host",
@@ -37,6 +38,7 @@ ${mod.description}
 
 [Preview](https://api.css.gal/${pack.name}/${mod.name})
 `);
+      docs.isTrusted = true;
       snippet.documentation = docs;
       completions.push(snippet);
     }

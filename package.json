@@ -20,6 +20,14 @@
     "onLanguage:css"
   ],
   "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "css",
+        "extensions": [".css"]
+      }
+    ]
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
