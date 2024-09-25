@@ -6,23 +6,41 @@ import fetch from "node-fetch";
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-  const patterns = await await getJson(
+  const packages = await await getJson(
     "https://api.css.gal/",
-  ) as Pattern[];
+  ) as Package[];
 
-  const completions = patterns.map((pattern) => {
-    const snippet = new vscode.CompletionItem(`_css:${pattern.name}`);
-    const text = pattern.css.replaceAll(
-      ".host",
-      ".${1:" + pattern.name + "}",
-    );
-    snippet.insertText = new vscode.SnippetString(text);
-    const docs: any = new vscode.MarkdownString(`${pattern.description}
-Preview: https://api.css.gal/${pattern.name}
+  const completions: vscode.CompletionItem[] = [];
+
+  for (const pack of packages) {
+    for (const mod of pack.modules) {
+      const snippet = new vscode.CompletionItem(
+        `_css:${pack.name}/${mod.name}`,
+      );
+      const text = mod.css.replaceAll(
+        ".host",
+        ".${1:" + mod.name + "}",
+      );
+      snippet.insertText = new vscode.SnippetString(text);
+      const docs: any = new vscode.MarkdownString(`
+## ${pack.name}
+
+${pack.description}
+
+---
+
+### ${mod.name}
+
+${mod.description}
+
+---
+
+[Preview](https://api.css.gal/${pack.name}/${mod.name})
 `);
-    snippet.documentation = docs;
-    return snippet;
-  });
+      snippet.documentation = docs;
+      completions.push(snippet);
+    }
+  }
 
   const patternsProvider = vscode.languages.registerCompletionItemProvider(
     "css",
@@ -39,7 +57,19 @@ Preview: https://api.css.gal/${pattern.name}
 // This method is called when your extension is deactivated
 export function deactivate() {}
 
-interface Pattern {
+interface Package {
+  name: string;
+  description: string;
+  author: Author | Author[];
+  modules: Module[];
+}
+
+interface Author {
+  name: string;
+  url: string;
+}
+
+interface Module {
   name: string;
   description: string;
   css: string;
