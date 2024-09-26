@@ -10,47 +10,75 @@ export async function activate(context: vscode.ExtensionContext) {
     "https://api.css.gal/",
   ) as Package[];
 
-  const completions: vscode.CompletionItem[] = [];
-
-  for (const pack of packages) {
-    for (const mod of pack.modules) {
-      const snippet = new vscode.CompletionItem(
-        `_css:${pack.name}/${mod.name}`,
-        vscode.CompletionItemKind.Snippet,
-      );
-      const text = mod.css.replaceAll(
-        ".host",
-        ".${1:" + mod.name + "}",
-      );
-      snippet.insertText = new vscode.SnippetString(text);
-      const docs: any = new vscode.MarkdownString(`
-## ${pack.name}
-
-${pack.description}
-
----
-
-### ${mod.name}
-
-${mod.description}
-
----
-
-[Preview](https://api.css.gal/${pack.name}/${mod.name})
-`);
-      docs.isTrusted = true;
-      snippet.documentation = docs;
-      completions.push(snippet);
-    }
-  }
-
   const patternsProvider = vscode.languages.registerCompletionItemProvider(
     "css",
     {
-      provideCompletionItems() {
-        return completions;
+      provideCompletionItems(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+      ) {
+        const linePrefix = document.lineAt(position).text.substr(
+          0,
+          position.character,
+        );
+
+        if (linePrefix.endsWith("/css/")) {
+          // Provide package names
+          return packages.map((pack) => {
+            const item = new vscode.CompletionItem(
+              pack.name,
+              vscode.CompletionItemKind.Module,
+            );
+            item.insertText = pack.name;
+            const docs = new vscode.MarkdownString(
+              `## ${pack.name}\n\n${pack.description}`,
+            );
+            docs.isTrusted = true;
+            item.documentation = docs;
+            return item;
+          });
+        }
+
+        const match = linePrefix.match(/css\/([^\/]+)\/$/);
+
+        if (match) {
+          // Provide module names for the specified package
+          const packageName = match[1];
+          const pack = packages.find((p) => p.name === packageName);
+
+          if (pack) {
+            return pack.modules.map((mod) => {
+              const item = new vscode.CompletionItem(
+                mod.name,
+                vscode.CompletionItemKind.Module,
+              );
+              const text = mod.css.replaceAll(
+                ".host",
+                ".${1:" + pack.name + "_" + mod.name + "}",
+              );
+              item.insertText = new vscode.SnippetString(text);
+              const docs = new vscode.MarkdownString(
+                `## ${pack.name}/${mod.name}\n\n${mod.description}\n\n[Preview](https://api.css.gal/${pack.name}/${mod.name})`,
+              );
+              docs.isTrusted = true;
+              item.documentation = docs;
+              item.additionalTextEdits = [
+                vscode.TextEdit.delete(
+                  new vscode.Range(
+                    position.translate(0, -(match[0].length + 1)),
+                    position,
+                  ),
+                ),
+              ];
+              return item;
+            });
+          }
+        }
+
+        return undefined;
       },
     },
+    "/", // Trigger character
   );
 
   context.subscriptions.push(patternsProvider);
