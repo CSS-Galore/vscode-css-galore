@@ -7,6 +7,7 @@ project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.0.4] - Unreleased
 ### Changed
 - Tree navigation (packages -> modules)
+- Changed command `css/`.
 
 ## [0.0.3] - 2024-09-25
 ### Changed
