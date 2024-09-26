@@ -1,5 +1,5 @@
 # CSS Galore for Visual Studio Code
 
-VS Code support for [CSS Galore](https://css.gal)
+VSCode support for [CSS Galore](https://css.gal)
 
-![screenshot](screenshot.png)
+<video controls src="screen.mp4"></video>

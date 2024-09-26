@@ -22,7 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
           position.character,
         );
 
-        if (linePrefix.endsWith("css/")) {
+        if (linePrefix.endsWith("import/")) {
           // Provide package names
           return packages.map((pack) => {
             const item = new vscode.CompletionItem(
@@ -39,7 +39,7 @@ export async function activate(context: vscode.ExtensionContext) {
           });
         }
 
-        const match = linePrefix.match(/css\/([^\/]+)\/$/);
+        const match = linePrefix.match(/import\/([^\/]+)\/$/);
 
         if (match) {
           // Provide module names for the specified package
@@ -126,7 +126,6 @@ interface Author {
 interface Module {
   name: string;
   description: string;
-  css: string;
 }
 
 async function getJson(url: string) {
