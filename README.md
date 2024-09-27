@@ -2,4 +2,4 @@
 
 VSCode support for [CSS Galore](https://css.gal)
 
-<video controls src="screen.mp4"></video>
+<video autoplay muted playsinline loop src="screen.mp4"></video>
