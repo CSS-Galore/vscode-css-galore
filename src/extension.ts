@@ -22,7 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
           position.character,
         );
 
-        if (linePrefix.endsWith("import/")) {
+        if (linePrefix.endsWith("add/")) {
           // Provide package names
           return packages.map((pack) => {
             const item = new vscode.CompletionItem(
@@ -30,16 +30,14 @@ export async function activate(context: vscode.ExtensionContext) {
               vscode.CompletionItemKind.Module,
             );
             item.insertText = pack.name;
-            const docs = new vscode.MarkdownString(
-              `## ${pack.name}\n\n${pack.description}`,
-            );
+            const docs = new vscode.MarkdownString(pack.description);
             docs.isTrusted = true;
             item.documentation = docs;
             return item;
           });
         }
 
-        const match = linePrefix.match(/import\/([^\/]+)\/$/);
+        const match = linePrefix.match(/add\/([^\/]+)\/$/);
 
         if (match) {
           // Provide module names for the specified package
@@ -54,7 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
               );
 
               const docs = new vscode.MarkdownString(
-                `## ${pack.name}/${mod.name}\n\n${mod.description}\n\n[Preview](https://api.css.gal/${pack.name}/${mod.name})`,
+                `${mod.description}\n\n[Preview](https://api.css.gal/${pack.name}/${mod.name})`,
               );
               docs.isTrusted = true;
               item.documentation = docs;
